@@ -23,15 +23,17 @@ Dada a escala dessa tabela, com mais de dois milhões de linhas e mais de vinte 
 
 ### 1. Configuração do Ambiente
 
-O início deste projeto envolve o desenvolvimento de uma infraestrutura para suportar o desenvolvimento e execução do código. Optamos por utilizar o Docker devido à sua facilidade de uso. Para o processamento dos dados, utilizamos o PySpark. Para isso, é necessário um contêiner que inclua o Python, PySpark, Java (pré-requisito do PySpark) e outras bibliotecas essenciais, como Minio, Pandas e NumPy. Para alcançar isso, criamos um Dockerfile que nos permite criar uma imagem personalizada com todas as bibliotecas necessárias. Além disso, configuramos um arquivo docker-compose para criar um contêiner Python com a imagem personalizada mencionada acima e outro contêiner para o Minio. É crucial configurar uma rede do tipo "bridge" no docker-compose para permitir a comunicação entre esses contêineres. Dentro da estrutura do projeto, criamos uma pasta chamada "airflow" para incluir o docker-compose responsável por criar o contêiner do Apache Airflow. Com a infra já configurada, estamos pronto para começar a codificar. Devido à natureza do projeto, estamos trabalhando com Programação Orientada a Objeto (POO), e as classes são organizadas na pasta "classe" dentro do diretório "source" (src). Todas as classes estão documentadas com o uso de docstrings para facilitar a compreensão da lógica do código.
+O início deste projeto envolve o desenvolvimento de uma infraestrutura para suportar o desenvolvimento e execução do código. Optamos por utilizar o Docker devido à sua facilidade de uso. Para o processamento dos dados, utilizamos o PySpark. Para isso, é necessário um contêiner que inclua o Python, PySpark, Java (pré-requisito do PySpark) e outras bibliotecas essenciais, como Minio, Pandas e NumPy. Para alcançar isso, criamos um [Dockerfile](/Dockerfile) que nos permite criar uma imagem personalizada com todas as bibliotecas necessárias. Além disso, configuramos um arquivo [docker-compose](/docker-compose.yml) para criar um contêiner Python com a imagem personalizada mencionada acima e outro contêiner para o Minio. É crucial configurar uma rede do tipo "bridge" no docker-compose para permitir a comunicação entre esses contêineres. Dentro da estrutura do projeto, criamos uma pasta chamada "airflow" para incluir o [docker-compose](/Airflow/docker-compose.yaml) responsável por criar o contêiner do Apache Airflow. 
+
+Com a infra já configurada, estamos pronto para começar a codificar. Devido à natureza do projeto, estamos trabalhando com Programação Orientada a Objeto (POO), e as classes são organizadas na pasta [classe](/src/classes/) dentro do diretório [source](/src/). Todas as classes estão documentadas com o uso de docstrings para facilitar a compreensão da lógica do código.
 
 ### 2. Ingestão de Dados
 
-Antes de começarmos a desenvolver o script PySpark para gerar o histórico das tabelas, é necessário configurar uma camada de armazenamento que simule a tabela. Utilizamos duas tabelas de exemplo: uma representa a tabela mais recente e a outra representa o histórico. Em seguida, criamos uma pipeline denominada "ingestao_de_dados.py" que lê esses dois arquivos CSV e os salva no formato Parquet no bucket "gold" do Minio, simulando a camada "gold" de um Data Lake. Para simplificar a interação com o Minio, utilizamos as classes "ConectaMinio" e "PysparkMinio". A primeira permite a criação de buckets, a listagem de arquivos e a inserção de arquivos na camada de armazenamento. A segunda, "PysparkMinio", possibilita a leitura de arquivos do Data Lake e a escrita de arquivos nele através do PySpark.
+Antes de começarmos a desenvolver o script PySpark para gerar o histórico das tabelas, é necessário configurar uma camada de armazenamento que simule a tabela. Utilizamos duas tabelas de exemplo: uma representa a tabela mais recente e a outra representa o histórico. Em seguida, criamos uma pipeline denominada  [ingestao_dados.py](/src/ingestao_dados.py/) que lê esses dois arquivos CSV e os salva no formato Parquet no bucket "gold" do Minio, simulando a camada "gold" de um Data Lake. Para simplificar a interação com o Minio, utilizamos as classes [ConectaMinio.py](/src/classes/ConectaMinio) e [PysparkMinio.py](/src/classes/PysparkMinio). A primeira permite a criação de buckets, a listagem de arquivos e a inserção de arquivos na camada de armazenamento. A segunda,  [PysparkMinio.py](/src/classes/PysparkMinio), possibilita a leitura de arquivos do Data Lake e a escrita de arquivos nele através do PySpark.
 
 ### 3. Desenvolvimento da Lógica de Geração de Histórico
 
-A próxima etapa do projeto envolve o desenvolvimento da lógica do script que compara duas tabelas e identifica as diferenças entre elas. O objetivo é criar uma tabela de histórico que mantém o registro das alterações ao longo do tempo, seguindo uma abordagem semelhante ao CDC (Change Data Capture). Para atingir esse objetivo, utilizamos a classe "CapturaDadosAlterados". Esta classe compara duas tabelas, uma recente e uma de histórico, e executa as seguintes operações:
+A próxima etapa do projeto envolve o desenvolvimento da lógica do script que compara duas tabelas e identifica as diferenças entre elas. O objetivo é criar uma tabela de histórico que mantém o registro das alterações ao longo do tempo, seguindo uma abordagem semelhante ao CDC (Change Data Capture). Para atingir esse objetivo, utilizamos a classe  [CapturaDadosAlterados.py](/src/classes/CapturaDadosAlterados). Esta classe compara duas tabelas, uma recente e uma de histórico, e executa as seguintes operações:
 
 - Linhas novas são adicionadas à tabela de histórico.
 - Linhas que não sofreram alterações permanecem inalteradas.
@@ -62,11 +64,13 @@ Siga os passos abaixo para rodar este projeto:
 
 2. Abra o terminal do seu computador e mova até o diretório do projeto.
 
-3. Crie a imagem do container do PySpark executando o seguinte comando: `docker build -t pyspark_image .`
+3. Entra na pasta src/jars e baixa o conector do pypsark no seguinte link https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.1026/aws-java-sdk-bundle-1.11.1026.jar e salve nesta mesma pasta, retorne a pasta do projeto raiz novamente pelo terminal.
 
-4. Crie os containers do PySpark e MinIO usando o seguinte comando: `docker-compose up -d`
+4. Crie a imagem do container do PySpark executando o seguinte comando: `docker build -t pyspark_image .`
 
-5. Navegue até a pasta do Airflow no terminal, aguarde a execução do container do PySpark e, em seguida, crie o container do Airflow com o seguinte comando: `docker-compose up -d`
+5. Crie os containers do PySpark e MinIO usando o seguinte comando: `docker-compose up -d`
+
+6. Navegue até a pasta do Airflow no terminal, aguarde a execução do container do PySpark e, em seguida, crie o container do Airflow com o seguinte comando: `docker-compose up -d`
 
 ## Conclusão 
 
