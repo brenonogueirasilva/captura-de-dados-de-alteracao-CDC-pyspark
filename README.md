@@ -14,6 +14,14 @@ Dada a escala dessa tabela, com mais de dois milhões de linhas e mais de vinte 
 - **Apache Airflow**: Necessário para a execução diária do script e orquestração da pipeline.
 - **Docker**: Utilizado para criar contêineres que hospedam o ambiente Python com PySpark, Minio e Apache Airflow.
 
+<p align="left">
+<img src="/img/python-logo.png" alt="python" height="50" /> 
+<img src="/img/minio-logo.webp" alt="minio" height="50" /> 
+<img src="/img/pyspark.jpg" alt="pyspark" height="50"/> 
+<img src="/img/AirflowLogo.png" alt="airflow" height="50"/> 
+<img src="/img/docker-logo.png" alt="docker" height="50"/> 
+</p>
+
 ## Arquitetura do Projeto
 
 ![Diagrama de Arquiteura do Projeto CDC](img/arquitetura_dados.png)
